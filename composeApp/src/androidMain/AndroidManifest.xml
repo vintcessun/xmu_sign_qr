@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest 
+	xmlns:android="http://schemas.android.com/apk/res/android" 
+	xmlns:tools="http://schemas.android.com/tools">
+	<uses-feature android:name="android.hardware.camera"/>
+	<uses-feature android:name="android.hardware.camera.autofocus"/>
+	<uses-permission android:name="android.permission.CAMERA"/>
+	<uses-permission android:name="android.permission.FLASHLIGHT"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+	<application android:name=".AndroidApp" android:icon="@android:drawable/ic_menu_compass" android:label="QRCode" tools:replace="android:name" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+		<activity android:name=".AppActivity" android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" android:launchMode="singleInstance" android:windowSoftInputMode="adjustPan" android:exported="true">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<provider android:name="androidx.core.content.FileProvider" android:authorities="org.qrcodedemo.app.androidApp.fileprovider" android:exported="false" android:grantUriPermissions="true">
+			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
+		</provider>
+	</application>
+</manifest>
