@@ -6,6 +6,8 @@
 
 能够实现扫码（在设备运行）并把解析后的结果传递到API的功能
 
+理论上使用的是Kotlin Multiplatform是可以支持IOS的但是我没有mac所以就没做
+
 ## 原md如下
 
 # QRKit - Compose Multiplatform
