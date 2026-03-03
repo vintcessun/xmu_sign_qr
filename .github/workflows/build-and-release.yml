@@ -60,27 +60,21 @@ jobs:
             - name: Grant execute permission for gradlew
               run: chmod +x gradlew
 
-            - name: Build iOS Framework and Artifacts
+            - name: Build iOS IPA
               run: |
-                  # 使用 Gradle 构建 iOS framework 和相关产物
-                  # 显式传递 Xcode 环境变量以绕过推断错误
-                  ./gradlew :composeApp:assembleReleaseAppleFrameworkForXcode \
-                    -Pkotlin.native.cocoapods.platform=iphoneos \
-                    -Pkotlin.native.cocoapods.archs=arm64 \
-                    -Pkotlin.native.cocoapods.configuration=Release
+                  # 既然直接运行 Gradle 任务找不到，我们回归到标准的 xcodebuild 流程。
+                  # 关键在于通过命令行参数传递 Xcode 环境变量，让内部触发的 Gradle 任务能够推断架构。
 
-            # 注意：Gradle 任务 :composeApp:assembleReleaseAppleFrameworkForXcode
-            # 主要生成 .framework 文件。如果要生成最终的 IPA，通常仍需 xcodebuild
-            # 或通过特定插件。这里我们先确保 Gradle 构建成功，并尝试进行无签名的 archive。
-
-            - name: Archive with xcodebuild (Skip Signing)
-              run: |
-                  # 使用 xcodebuild 进行 archive，但跳过签名以解决 Team ID 问题
+                  # 使用 xcodebuild 进行构建
+                  # 显式设置 ARCHS, SDKROOT, CONFIGURATION 等，这些会被传递给 Gradle
                   xcodebuild -project iosApp/iosApp.xcodeproj \
                     -scheme iosApp \
                     -sdk iphoneos \
                     -configuration Release \
                     -archivePath $RUNNER_TEMP/iosApp.xcarchive \
+                    ARCHS="arm64" \
+                    SDKROOT="iphoneos" \
+                    CONFIGURATION="Release" \
                     CODE_SIGNING_REQUIRED=NO \
                     CODE_SIGNING_ALLOWED=NO \
                     archive
