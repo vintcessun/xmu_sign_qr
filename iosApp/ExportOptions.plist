@@ -3,10 +3,15 @@
 <plist version="1.0">
 	<dict>
 		<key>method</key>
-		<string>app-store</string>
-		<!-- 或者 ad-hoc, development, enterprise -->
+		<string>development</string>
 		<key>signingStyle</key>
 		<string>manual</string>
+		<key>compileBitcode</key>
+		<false/>
+		<key>signingCertificate</key>
+		<string>-</string>
+		<key>provisioningProfiles</key>
+		<dict/>
 		<key>stripSwiftSymbols</key>
 		<true/>
 		<key>teamID</key>
