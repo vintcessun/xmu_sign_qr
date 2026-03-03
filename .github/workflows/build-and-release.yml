@@ -74,8 +74,20 @@ jobs:
                   KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
                   # import certificate and provisioning profile from secrets
-                  echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-                  echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+                  # 使用 base64 -D (macOS) 或 base64 --decode (Linux/macOS)
+                  # 错误 "Unable to decode" 通常是因为 Base64 字符串格式问题或环境变量为空
+                  if [ -z "$BUILD_CERTIFICATE_BASE64" ]; then
+                    echo "Error: BUILD_CERTIFICATE_BASE64 is empty. Please set it in GitHub Secrets."
+                    exit 1
+                  fi
+                  echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
+                  echo "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode > $PP_PATH
+
+                  # 检查文件是否创建成功
+                  if [ ! -s "$CERTIFICATE_PATH" ]; then
+                    echo "Error: Failed to decode certificate."
+                    exit 1
+                  fi
 
                   # create temporary keychain
                   security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
