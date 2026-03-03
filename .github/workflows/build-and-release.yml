@@ -52,14 +52,14 @@ jobs:
 
             - name: set up JDK 17
               uses: actions/setup-java@v4
-              with:
+              with: 
                   java-version: "17"
                   distribution: "temurin"
                   cache: gradle
 
             - name: Set Kotlin Native Memory
               run: |
-                  # Kotlin Native 编译非常耗费内存，设置 6G 堆内存以防止 OutOfMemoryError
+                  # Kotlin Native 编译非常耗费内存，设置 6G 堆内存以防止    
                   mkdir -p ~/.gradle
                   echo "org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g" >> ~/.gradle/gradle.properties
                   echo "kotlin.daemon.jvmargs=-Xmx6g" >> ~/.gradle/gradle.properties
