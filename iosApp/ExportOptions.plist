@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>method</key>
+		<string>app-store</string>
+		<!-- 或者 ad-hoc, development, enterprise -->
+		<key>signingStyle</key>
+		<string>manual</string>
+		<key>stripSwiftSymbols</key>
+		<true/>
+		<key>teamID</key>
+		<string>YOUR_TEAM_ID</string>
+		<!-- 替换为实际的 Team ID -->
+		<key>uploadSymbols</key>
+		<true/>
+	</dict>
+</plist>
