@@ -62,18 +62,18 @@ jobs:
 
             - name: Build iOS IPA
               run: |
-                  # 构建 Kotlin Multiplatform 框架
-                  ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
-
-                  # 既然签名数据已经在文件夹中，我们直接尝试构建
-                  # 如果签名已在项目设置中配置好，xcodebuild 会自动识别
+                  # 在 KMP 项目中，直接调用 gradlew embed 任务通常需要 Xcode 环境变量（如 ARCHS）。
+                  # 推荐的做法是直接运行 xcodebuild，它会自动触发所需的 Gradle 任务。
 
                   # 使用 xcodebuild 进行构建
+                  # 我们显式指定 ARCHS 和 SDK 以解决架构推断问题
                   xcodebuild -workspace iosApp/iosApp.xcworkspace \
                     -scheme iosApp \
                     -sdk iphoneos \
                     -configuration Release \
                     -archivePath $RUNNER_TEMP/iosApp.xcarchive \
+                    ARCHS="arm64" \
+                    VALID_ARCHS="arm64" \
                     archive \
                     -allowProvisioningUpdates
 
