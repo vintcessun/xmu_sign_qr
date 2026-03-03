@@ -67,7 +67,8 @@ jobs:
 
                   # 使用 xcodebuild 进行构建
                   # 我们显式指定 ARCHS 和 SDK 以解决架构推断问题
-                  xcodebuild -workspace iosApp/iosApp.xcworkspace \
+                  # 修正路径：由于没有 .xcworkspace，我们直接使用 .xcodeproj
+                  xcodebuild -project iosApp/iosApp.xcodeproj \
                     -scheme iosApp \
                     -sdk iphoneos \
                     -configuration Release \
