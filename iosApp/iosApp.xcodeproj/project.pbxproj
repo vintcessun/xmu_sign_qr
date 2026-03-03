@@ -317,7 +317,7 @@
 					ComposeApp,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.chaintech.app;
-				PRODUCT_NAME = QRCodeDemo;
+				PRODUCT_NAME = QRCode;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -359,7 +359,7 @@
 					ComposeApp,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.chaintech.app;
-				PRODUCT_NAME = QRCodeDemo;
+				PRODUCT_NAME = QRCode;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
