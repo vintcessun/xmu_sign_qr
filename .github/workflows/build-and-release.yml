@@ -57,55 +57,13 @@ jobs:
                   distribution: "temurin"
                   cache: gradle
 
-            # Kotlin 编译器通常通过 Gradle 自动处理，
-            # 这里的 setup-java 已经提供了环境。
-            # 如果需要特定的 Kotlin 版本，可以通过 gradlew 传递。
-
-            - name: Install the Apple certificate and provisioning profile
-              env:
-                  BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-                  P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-                  BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-                  KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-              run: |
-                  # create variables
-                  CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-                  PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-                  KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
-                  # import certificate and provisioning profile from secrets
-                  # 使用 base64 -D (macOS) 或 base64 --decode (Linux/macOS)
-                  # 错误 "Unable to decode" 通常是因为 Base64 字符串格式问题或环境变量为空
-                  if [ -z "$BUILD_CERTIFICATE_BASE64" ]; then
-                    echo "Error: BUILD_CERTIFICATE_BASE64 is empty. Please set it in GitHub Secrets."
-                    exit 1
-                  fi
-                  echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
-                  echo "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode > $PP_PATH
-
-                  # 检查文件是否创建成功
-                  if [ ! -s "$CERTIFICATE_PATH" ]; then
-                    echo "Error: Failed to decode certificate."
-                    exit 1
-                  fi
-
-                  # create temporary keychain
-                  security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-                  security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-                  security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-                  # import certificate to keychain
-                  security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-                  security list-keychain -d user -s $KEYCHAIN_PATH
-
-                  # apply provisioning profile
-                  mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-                  cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-
             - name: Build iOS IPA
               run: |
                   # 构建 Kotlin Multiplatform 框架
                   ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+
+                  # 既然签名数据已经在文件夹中，我们直接尝试构建
+                  # 如果签名已在项目设置中配置好，xcodebuild 会自动识别
 
                   # 使用 xcodebuild 进行构建
                   xcodebuild -workspace iosApp/iosApp.xcworkspace \
@@ -117,8 +75,6 @@ jobs:
                     -allowProvisioningUpdates
 
                   # 导出 IPA
-                  # 注意：需要一个 ExportOptions.plist 文件
-                  # 这里简单处理，实际生产环境需要提供此文件
                   xcodebuild -exportArchive \
                     -archivePath $RUNNER_TEMP/iosApp.xcarchive \
                     -exportOptionsPlist iosApp/ExportOptions.plist \
