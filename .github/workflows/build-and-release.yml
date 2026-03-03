@@ -52,7 +52,7 @@ jobs:
 
             - name: set up JDK 17
               uses: actions/setup-java@v4
-              with: 
+              with:
                   java-version: "17"
                   distribution: "temurin"
                   cache: gradle
@@ -87,19 +87,17 @@ jobs:
                     CODE_SIGNING_ALLOWED=NO \
                     archive
 
-            - name: Export IPA (Unsigned)
+            - name: Package App as IPA (Unsigned)
               run: |
-                  # 导出 IPA
-                  mkdir -p $RUNNER_TEMP/build/ipa
-                  xcodebuild -exportArchive \
-                    -archivePath $RUNNER_TEMP/iosApp.xcarchive \
-                    -exportOptionsPlist iosApp/ExportOptions.plist \
-                    -exportPath $RUNNER_TEMP/build/ipa \
-                    CODE_SIGNING_REQUIRED=NO \
-                    CODE_SIGNING_ALLOWED=NO
+                  # 绕过 xcodebuild -exportArchive 的签名限制，手动打包成 IPA
+                  mkdir -p $RUNNER_TEMP/build/ipa/Payload
+                  cp -r $RUNNER_TEMP/iosApp.xcarchive/Products/Applications/*.app $RUNNER_TEMP/build/ipa/Payload/
+                  cd $RUNNER_TEMP/build/ipa
+                  zip -r QRCode.ipa Payload
+                  rm -rf Payload
 
             - name: Upload IPA
               uses: actions/upload-artifact@v4
               with:
                   name: ios-release-ipa
-                  path: ${{ runner.temp }}/build/ipa/*.ipa
+                  path: ${{ runner.temp }}/build/ipa/QRCode.ipa
