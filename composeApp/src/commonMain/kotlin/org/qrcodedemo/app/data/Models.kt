@@ -46,7 +46,7 @@ data class AutoSignResponse(
             }
             "qr" -> {
                 when (status) {
-                    "success" -> "二维码签到成功${content?.course_name}"
+                    "success" -> "二维码签到成功${content?.course_name}，签到详情${content?.sign_result}"
                     "already_signed" -> "二维码签到${content?.course_name}已签到"
                     "pending" -> "未二维码签到${content?.course_name}，请用/sign查看状态，如果有人发送二维码会自动推送"
                     else -> "二维码签到状态: $status"

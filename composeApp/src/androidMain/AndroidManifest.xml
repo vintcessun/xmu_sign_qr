@@ -7,7 +7,7 @@
 	<uses-permission android:name="android.permission.CAMERA"/>
 	<uses-permission android:name="android.permission.FLASHLIGHT"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-	<application android:name=".AndroidApp" android:icon="@android:drawable/ic_menu_compass" android:label="QRCode" tools:replace="android:name" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+	<application android:name=".AndroidApp" android:icon="@mipmap/ic_launcher" android:label="QRCode" tools:replace="android:name" android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
 		<activity android:name=".AppActivity" android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" android:launchMode="singleInstance" android:windowSoftInputMode="adjustPan" android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />

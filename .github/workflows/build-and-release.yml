@@ -35,9 +35,9 @@ jobs:
                   # 使用项目内的 release.keystore
                   # 注意：密码仍然应该放在 Secrets 中以防泄漏
                   # 这里我们假设 Secrets 中配置了对应的密码，如果没有则回退到 build.gradle.kts 的默认值
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD || 'password' }}
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS || 'releaseKey' }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD || 'password' }}
+                  SIGNING_STORE_PASSWORD: "password"
+                  SIGNING_KEY_ALIAS: "releaseKey"
+                  SIGNING_KEY_PASSWORD: "password"
 
             - name: Upload APKs
               uses: actions/upload-artifact@v4

@@ -271,7 +271,7 @@ fun BoxScope.SignResultsDisplay(results: List<QrSignResponse>, onClose: () -> Un
             .padding(horizontal = 14.sdp)
             .padding(bottom = 30.sdp)
             .fillMaxWidth()
-            .fillMaxHeight(0.4f)
+            .fillMaxHeight(0.7f)
             .background(Color(0xCC000000), RoundedCornerShape(12.sdp))
             .padding(12.sdp)
             .align(Alignment.BottomCenter)
@@ -298,7 +298,9 @@ fun BoxScope.SignResultsDisplay(results: List<QrSignResponse>, onClose: () -> Un
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.sdp), color = Color.Gray)
 
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.sdp)
         ) {
             items(results) { result ->
