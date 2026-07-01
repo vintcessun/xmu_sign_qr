@@ -6,6 +6,15 @@ on:
     pull_request:
         branches: [main, master]
     workflow_dispatch:
+        inputs:
+            release_tag:
+                description: "Release tag，例如 v1.0.0；留空则只编译不发布"
+                required: false
+                type: string
+                default: ""
+
+permissions:
+    contents: write
 
 jobs:
     build-android:
@@ -13,9 +22,8 @@ jobs:
         strategy:
             matrix:
                 include:
-                    # 如果需要分别为 arm64 和 x86_64 生成 APK，可以取消注释
-                    # 但通常 assembleRelease 会根据配置生成全架构或 Split APKs
                     - arch: "universal"
+
         steps:
             - uses: actions/checkout@v4
 
@@ -32,12 +40,9 @@ jobs:
             - name: Build Android Release APK
               run: ./gradlew :composeApp:assembleRelease
               env:
-                  # 使用项目内的 release.keystore
-                  # 注意：密码仍然应该放在 Secrets 中以防泄漏
-                  # 这里我们假设 Secrets 中配置了对应的密码，如果没有则回退到 build.gradle.kts 的默认值
-                  SIGNING_STORE_PASSWORD: "password"
-                  SIGNING_KEY_ALIAS: "releaseKey"
-                  SIGNING_KEY_PASSWORD: "password"
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD || 'password' }}
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS || 'releaseKey' }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD || 'password' }}
 
             - name: Upload APKs
               uses: actions/upload-artifact@v4
@@ -47,6 +52,7 @@ jobs:
 
     build-ios:
         runs-on: macos-latest
+
         steps:
             - uses: actions/checkout@v4
 
@@ -59,7 +65,6 @@ jobs:
 
             - name: Set Kotlin Native Memory
               run: |
-                  # Kotlin Native 编译非常耗费内存，设置 6G 堆内存以防止    
                   mkdir -p ~/.gradle
                   echo "org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g" >> ~/.gradle/gradle.properties
                   echo "kotlin.daemon.jvmargs=-Xmx6g" >> ~/.gradle/gradle.properties
@@ -70,11 +75,6 @@ jobs:
 
             - name: Build iOS Framework and Archive
               run: |
-                  # 虽然可以使用 ./gradlew 编译，但在 KMP 中生成最终的安装文件 (IPA) 
-                  # 通常仍需要通过 xcodebuild 包装，或者使用专门的 Gradle 插件
-                  # 这里我们直接使用 xcodebuild，它会自动根据项目配置调用 gradlew 任务。
-                  # 显式传递架构参数以确保 KMP 任务能正确推断环境。
-
                   xcodebuild -project iosApp/iosApp.xcodeproj \
                     -scheme iosApp \
                     -sdk iphoneos \
@@ -87,9 +87,8 @@ jobs:
                     CODE_SIGNING_ALLOWED=NO \
                     archive
 
-            - name: Package App as IPA (Unsigned)
+            - name: Package App as IPA Unsigned
               run: |
-                  # 绕过 xcodebuild -exportArchive 的签名限制，手动打包成 IPA
                   mkdir -p $RUNNER_TEMP/build/ipa/Payload
                   cp -r $RUNNER_TEMP/iosApp.xcarchive/Products/Applications/*.app $RUNNER_TEMP/build/ipa/Payload/
                   cd $RUNNER_TEMP/build/ipa
@@ -101,3 +100,41 @@ jobs:
               with:
                   name: ios-release-ipa
                   path: ${{ runner.temp }}/build/ipa/QRCode.ipa
+
+    release:
+        name: Publish GitHub Release
+        runs-on: ubuntu-latest
+        needs:
+            - build-android
+            - build-ios
+
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag != '' }}
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Download Android APK artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: android-release-apks
+                  path: ${{ runner.temp }}/release-assets/android
+
+            - name: Download iOS IPA artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: ios-release-ipa
+                  path: ${{ runner.temp }}/release-assets/ios
+
+            - name: Show release assets
+              run: find "${{ runner.temp }}/release-assets" -type f -maxdepth 4 -print
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ inputs.release_tag }}
+                  name: ${{ inputs.release_tag }}
+                  target_commitish: ${{ github.sha }}
+                  generate_release_notes: true
+                  files: |
+                      ${{ runner.temp }}/release-assets/android/*.apk
+                      ${{ runner.temp }}/release-assets/ios/*.ipa
